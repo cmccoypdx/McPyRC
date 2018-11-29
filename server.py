@@ -26,9 +26,7 @@ def main():
         chanlist['main'].append(conn)
 
       else:
-        #while(1): 
         data = s.recv(1024)
-          #data = data * 1000
         if not data:
           break
         msg = data.decode('UTF-8')
@@ -36,6 +34,9 @@ def main():
           if re.match(r"/quit+", msg):
             s.close()
             input.remove(s)
+            for chan in chanlist:
+              if s in chanlist[chan]:
+                chanlist[chan].remove(s)
           elif re.match(r"/join+", msg):
             msg = msg[6:]
             if msg in chanlist:
@@ -49,8 +50,9 @@ def main():
               chanlist[msg].remove(s)
             print(chanlist)
         else:
-          s.sendall(data)
-  #conn.close()
-
+          for chan in chanlist:
+            if s in chanlist[chan]:
+              for r in chanlist[chan]:
+                r.sendall(data)
 if __name__ == '__main__':
   main()
