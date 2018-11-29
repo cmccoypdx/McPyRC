@@ -17,10 +17,15 @@ def main():
 
     if re.match(r"/+", msg):
       if re.match(r"/quit+", msg):
+        s.sendall('/quit'.encode('UTF-8'))
         s.close()
         break
+      elif re.match(r"/join", msg):
+        s.sendall(msg.encode('UTF-8'))
+        continue
       else:
         print('Invalid command')
+        continue
 
     msg = msg.encode('UTF-8')
 
