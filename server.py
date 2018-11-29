@@ -42,7 +42,12 @@ def main():
               chanlist[msg].append(s)
             else:
               chanlist[msg] = [s]
-          print(chanlist)
+            print(chanlist)
+          elif re.match(r"/leave+", msg):
+            msg = msg[7:]
+            if msg in chanlist:
+              chanlist[msg].remove(s)
+            print(chanlist)
         else:
           s.sendall(data)
   #conn.close()

@@ -23,6 +23,9 @@ def main():
       elif re.match(r"/join", msg):
         s.sendall(msg.encode('UTF-8'))
         continue
+      elif re.match(r"/leave", msg):
+        s.sendall(msg.encode('UTF-8'))
+        continue
       else:
         print('Invalid command')
         continue
