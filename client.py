@@ -1,5 +1,6 @@
 import socket
 import sys
+import re
 
 def main():
   s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -9,7 +10,17 @@ def main():
   s.connect((host, port))
 
   while(1):
-    msg = input().encode('UTF-8')
+    msg = input()
+
+    if re.match(r"/+", msg):
+      if re.match(r"/quit+", msg):
+        s.close()
+        break
+      else:
+        print('Invalid command')
+
+    msg = msg.encode('UTF-8')
+
     while(len(msg) > 1024):
       s.send(msg[:1024])
       msg = msg[1024:]
