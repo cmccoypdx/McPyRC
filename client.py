@@ -8,16 +8,21 @@ def main():
   port = int(sys.argv[2])
   s.connect((host, port))
 
-  msg = sys.argv[3].encode('UTF-8')
-
-  s.sendall(msg)
-
   while(1):
-    data = s.recv(1000000)
-    print(data.decode('UTF-8'))
-    if not data:
-      break
-    print('received', len(data), 'bytes')
+    msg = input().encode('UTF-8')
+    while(len(msg) > 1024):
+      s.send(msg[:1024])
+      msg = msg[1024:]
+      data = s.recv(1024)
+      print(data.decode('UTF-8'))
+      print('received', len(data), 'bytes')
+
+
+    else:
+      s.sendall(msg)
+      data = s.recv(1024)
+      print(data.decode('UTF-8'))
+      print('received', len(data), 'bytes')
 
   s.close()
 

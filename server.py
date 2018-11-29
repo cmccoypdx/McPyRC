@@ -13,11 +13,13 @@ def main():
     conn, addr = s.accept()
     print('client is at', addr)
 
-    data = conn.recv(1000000)
-    #data = data * 1000
-
-    conn.sendall(data)
-    conn.close()
+    while(1): 
+      data = conn.recv(1024)
+      #data = data * 1000
+      if not data:
+        break
+      conn.sendall(data)
+  #conn.close()
 
 if __name__ == '__main__':
   main()
