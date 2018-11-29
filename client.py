@@ -12,6 +12,9 @@ def main():
   while(1):
     msg = input()
 
+    if(msg == ''):
+      continue
+
     if re.match(r"/+", msg):
       if re.match(r"/quit+", msg):
         s.close()
