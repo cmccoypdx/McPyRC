@@ -4,6 +4,7 @@ import socket
 import sys
 import re
 import threading
+from socket import error as socket_error
 
 keepListening = True
 
@@ -12,10 +13,18 @@ class listenThread (threading.Thread):
     threading.Thread.__init__(self)
     self.s = s
   def run(self):
+    global keepListening
     while(keepListening):
-      data = self.s.recv(1024)
-      msg = data.decode('UTF-8')
-      print(data.decode('UTF-8'))
+      try:
+        data = self.s.recv(1024)
+        msg = data.decode('UTF-8')
+        print(data.decode('UTF-8'))
+      except socket_error as err:
+        print(err)
+        print('Could not communicate with server')
+        self.s.close()
+        keepListening = False
+        break
 
 class sendThread (threading.Thread):
   def __init__(self, s):
@@ -30,36 +39,44 @@ class sendThread (threading.Thread):
       if(msg == ''):
         continue
 
-      if re.match(r"/+", msg):
-        if re.match(r"/quit+", msg):
-          s.sendall('/quit'.encode('UTF-8'))
-          keepListening = False
-          s.close()
-          break
-        elif re.match(r"/join", msg):
-          s.sendall(msg.encode('UTF-8'))
-          continue
-        elif re.match(r"/leave", msg):
-          s.sendall(msg.encode('UTF-8'))
-          continue
-        elif re.match(r"/list", msg):
-          s.sendall(msg.encode('UTF-8'))
-          continue
-        elif re.match(r"/switch", msg):
-          channel = msg[8:]
-          s.sendall(msg.encode('UTF-8'))
-          continue
-        else:
-          print('Invalid command')
-          continue
+      try:
+        if re.match(r"/+", msg):
+          if re.match(r"/quit+", msg):
+            s.sendall('/quit'.encode('UTF-8'))
+            keepListening = False
+            s.close()
+            break
+          elif re.match(r"/join", msg):
+            s.sendall(msg.encode('UTF-8'))
+            continue
+          elif re.match(r"/leave", msg):
+            s.sendall(msg.encode('UTF-8'))
+            continue
+          elif re.match(r"/list", msg):
+            s.sendall(msg.encode('UTF-8'))
+            continue
+          elif re.match(r"/switch", msg):
+            channel = msg[8:]
+            s.sendall(msg.encode('UTF-8'))
+            continue
+          else:
+            print('Invalid command')
+            continue
 
-      msg = msg.encode('UTF-8')
+        msg = msg.encode('UTF-8')
 
-      while(len(msg) > 1024):
-        s.send(msg[:1024])
-        msg = msg[1024:]
+        while(len(msg) > 1024):
+          s.send(msg[:1024])
+          msg = msg[1024:]
 
-      s.sendall(msg)
+        s.sendall(msg)
+
+      except socket_error as err:
+        print('Could not communicate with server: ' + err)
+        print('Shutting down')
+        s.close()
+        keepListening = False
+        break
   
 def main():
   s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

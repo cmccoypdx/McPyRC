@@ -61,12 +61,15 @@ def main():
               for r in chanlist[msg]:
                 r.sendall(('[' + msg + '] Server: ' + members[s][0] + ' has left ' + msg).encode('UTF-8')) 
           elif re.match(r"/listmembers", msg):
-            msg = msg[6:]
+            msg = msg[13:]
             inChan = []
-            for m in chanlist[msg]:
-              inChan.append(members[m][0])
-            response = ', '.join(inChan)
-            s.sendall(response.encode('UTF-8'))
+            if msg in chanlist:
+              for m in chanlist[msg]:
+                inChan.append(members[m][0])
+              response = ', '.join(inChan)
+              s.sendall(response.encode('UTF-8'))
+            else:
+              s.sendall(('No such room').encode('UTF-8'))
           elif re.match(r"/list", msg):
             response = ', '.join(chanlist.keys())
             s.sendall(response.encode('UTF-8'))
