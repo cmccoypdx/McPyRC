@@ -14,8 +14,8 @@ class listenThread (threading.Thread):
   def run(self):
     while(keepListening):
       data = self.s.recv(1024)
+      msg = data.decode('UTF-8')
       print(data.decode('UTF-8'))
-      #print('received', len(data), 'bytes')
 
 class sendThread (threading.Thread):
   def __init__(self, s):
@@ -46,6 +46,7 @@ class sendThread (threading.Thread):
           s.sendall(msg.encode('UTF-8'))
           continue
         elif re.match(r"/switch", msg):
+          channel = msg[8:]
           s.sendall(msg.encode('UTF-8'))
           continue
         else:
@@ -61,7 +62,6 @@ class sendThread (threading.Thread):
       s.sendall(msg)
   
 def main():
-  keepListening = True
   s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
   nick = input("Please enter nickname: ")

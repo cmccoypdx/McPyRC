@@ -24,14 +24,12 @@ def main():
 
       if s == server:
         conn, addr = s.accept()
-        #print('client is at', addr)
         nick = conn.recv(64).decode('UTF-8')
         input.append(conn)
         chanlist['#main'].append(conn)
         members[conn] = [nick, '#main']
-        print(nick, ' has joined')
         for r in chanlist['#main']:
-          r.sendall((nick + ' has joined #main').encode('UTF-8'))
+          r.sendall(('[#main] Server: ' + nick + ' has joined #main').encode('UTF-8'))
 
       else:
         data = s.recv(1024)
@@ -45,7 +43,7 @@ def main():
               if s in chanlist[chan]:
                 chanlist[chan].remove(s)
                 for r in chanlist[chan]:
-                  r.sendall((members[s][0] + ' has left ' + chan + ' ').encode('UTF-8')) 
+                  r.sendall(('[' + chan + '] Server: ' + members[s][0] + ' has left ' + chan + ' ').encode('UTF-8')) 
             del members[s]
             s.close()
           elif re.match(r"/join+", msg):
@@ -55,28 +53,33 @@ def main():
             else:
               chanlist[msg] = [s]
             for r in chanlist[msg]:
-              r.sendall((members[s][0] + ' has joined ' + msg).encode('UTF-8'))
+              r.sendall(('[' + msg + '] Server: ' + members[s][0] + ' has joined ' + msg).encode('UTF-8'))
           elif re.match(r"/leave+", msg):
             msg = msg[7:]
             if msg in chanlist:
               chanlist[msg].remove(s)
               for r in chanlist[msg]:
-                r.sendall((members[s][0] + ' has left ' + msg).encode('UTF-8')) 
-          elif re.match(r"/list", msg):
+                r.sendall(('[' + msg + '] Server: ' + members[s][0] + ' has left ' + msg).encode('UTF-8')) 
+          elif re.match(r"/listmembers", msg):
             msg = msg[6:]
             inChan = []
             for m in chanlist[msg]:
               inChan.append(members[m][0])
             response = ', '.join(inChan)
             s.sendall(response.encode('UTF-8'))
+          elif re.match(r"/list", msg):
+            response = ', '.join(chanlist.keys())
+            s.sendall(response.encode('UTF-8'))
           elif re.match(r"/switch", msg):
-            print(msg)
             msg = msg[8:]
-            print(msg)
-            members[s][1] = msg
+            if msg in chanlist:
+              members[s][1] = msg
+            else:
+              s.sendall('No such room. Use /join to create.'.encode('UTF-8'))
         else:
+          msg = data.decode('UTF-8')
           chan = members[s][1]
           for r in chanlist[chan]:
-                r.sendall(data)
+            r.sendall(('[' + chan + '] ' + members[s][0] + ': ' + msg).encode('UTF-8'))
 if __name__ == '__main__':
   main()
