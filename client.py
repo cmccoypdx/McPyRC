@@ -61,9 +61,11 @@ def main():
   keepListening = True
   s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+  nick = input("Please enter nickname: ")
   host = sys.argv[1]
   port = int(sys.argv[2])
   s.connect((host, port))
+  s.sendall(nick.encode('UTF-8'))
 
   listen = listenThread(s)
   send = sendThread(s)

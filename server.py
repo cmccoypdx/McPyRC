@@ -15,6 +15,7 @@ def main():
 
   server.listen(5)
   input = [server]
+  members = {}
   
   while(1):
     inputready,outputready,exceptready = select.select(input,[],[])
@@ -23,9 +24,12 @@ def main():
 
       if s == server:
         conn, addr = s.accept()
-        print('client is at', addr)
+        #print('client is at', addr)
+        nick = conn.recv(64).decode('UTF-8')
         input.append(conn)
         chanlist['#main'].append(conn)
+        members[conn] = [nick, '#main']
+        print(nick, ' has joined')
 
       else:
         data = s.recv(1024)
@@ -36,6 +40,7 @@ def main():
           if re.match(r"/quit+", msg):
             s.close()
             input.remove(s)
+            del members[s]
             for chan in chanlist:
               if s in chanlist[chan]:
                 chanlist[chan].remove(s)
@@ -52,7 +57,11 @@ def main():
               chanlist[msg].remove(s)
             print(chanlist)
           elif re.match(r"/list", msg):
-            response = ', '.join(chanlist.keys())
+            msg = msg[6:]
+            inChan = []
+            for m in chanlist[msg]:
+              inChan.append(members[m][0])
+            response = ', '.join(inChan)
             s.sendall(response.encode('UTF-8'))
         else:
           for chan in chanlist:
