@@ -31,7 +31,7 @@ def main():
         members[conn] = [nick, '#main']
         print(nick, ' has joined')
         for r in chanlist['#main']:
-          r.sendall((nick + ' has joined').encode('UTF-8'))
+          r.sendall((nick + ' has joined #main').encode('UTF-8'))
 
       else:
         data = s.recv(1024)
@@ -40,24 +40,28 @@ def main():
         msg = data.decode('UTF-8')
         if re.match(r"/+", msg):
           if re.match(r"/quit+", msg):
-            s.close()
             input.remove(s)
-            del members[s]
             for chan in chanlist:
               if s in chanlist[chan]:
                 chanlist[chan].remove(s)
+                for r in chanlist[chan]:
+                  r.sendall((members[s][0] + ' has left ' + chan + ' ').encode('UTF-8')) 
+            del members[s]
+            s.close()
           elif re.match(r"/join+", msg):
             msg = msg[6:]
             if msg in chanlist:
               chanlist[msg].append(s)
             else:
               chanlist[msg] = [s]
-            print(chanlist)
+            for r in chanlist[msg]:
+              r.sendall((members[s][0] + ' has joined ' + msg).encode('UTF-8'))
           elif re.match(r"/leave+", msg):
             msg = msg[7:]
             if msg in chanlist:
               chanlist[msg].remove(s)
-            print(chanlist)
+              for r in chanlist[msg]:
+                r.sendall((members[s][0] + ' has left ' + msg).encode('UTF-8')) 
           elif re.match(r"/list", msg):
             msg = msg[6:]
             inChan = []
