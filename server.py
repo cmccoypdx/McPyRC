@@ -1,10 +1,12 @@
+#!/usr/bin/python3
+
 import socket
 import sys
 import select
 import re
 
 def main():
-  chanlist = { 'main': [] }
+  chanlist = { '#main': [] }
   server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
   host = ''
@@ -23,7 +25,7 @@ def main():
         conn, addr = s.accept()
         print('client is at', addr)
         input.append(conn)
-        chanlist['main'].append(conn)
+        chanlist['#main'].append(conn)
 
       else:
         data = s.recv(1024)
@@ -49,6 +51,9 @@ def main():
             if msg in chanlist:
               chanlist[msg].remove(s)
             print(chanlist)
+          elif re.match(r"/list", msg):
+            response = ', '.join(chanlist.keys())
+            s.sendall(response.encode('UTF-8'))
         else:
           for chan in chanlist:
             if s in chanlist[chan]:

@@ -15,7 +15,7 @@ class listenThread (threading.Thread):
     while(keepListening):
       data = self.s.recv(1024)
       print(data.decode('UTF-8'))
-      print('received', len(data), 'bytes')
+      #print('received', len(data), 'bytes')
 
 class sendThread (threading.Thread):
   def __init__(self, s):
@@ -40,6 +40,9 @@ class sendThread (threading.Thread):
           s.sendall(msg.encode('UTF-8'))
           continue
         elif re.match(r"/leave", msg):
+          s.sendall(msg.encode('UTF-8'))
+          continue
+        elif re.match(r"/list", msg):
           s.sendall(msg.encode('UTF-8'))
           continue
         else:
