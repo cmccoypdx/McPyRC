@@ -30,6 +30,8 @@ def main():
         chanlist['#main'].append(conn)
         members[conn] = [nick, '#main']
         print(nick, ' has joined')
+        for r in chanlist['#main']:
+          r.sendall((nick + ' has joined').encode('UTF-8'))
 
       else:
         data = s.recv(1024)
@@ -63,10 +65,14 @@ def main():
               inChan.append(members[m][0])
             response = ', '.join(inChan)
             s.sendall(response.encode('UTF-8'))
+          elif re.match(r"/switch", msg):
+            print(msg)
+            msg = msg[8:]
+            print(msg)
+            members[s][1] = msg
         else:
-          for chan in chanlist:
-            if s in chanlist[chan]:
-              for r in chanlist[chan]:
+          chan = members[s][1]
+          for r in chanlist[chan]:
                 r.sendall(data)
 if __name__ == '__main__':
   main()
